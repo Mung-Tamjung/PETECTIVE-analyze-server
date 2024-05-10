@@ -31,7 +31,7 @@ for p in grouped_df.index:
     r=float(grouped_df.loc[p, 'value_count']) #radius값 int일 경우 오류 발생 -> float으로 바꿔주기
     folium.CircleMarker([lat, lon],
                         radius=r,
-                        #popup=grouped_df.loc[p, 'lat']+","+grouped_df.loc[p, 'lon'],
+                        popup="("+str(grouped_df.loc[p, 'lat'])+","+str(grouped_df.loc[p, 'lon'])+")",
                         fill=True).add_to(gps_map)
     
 gps_map.save("gps_map.html")
