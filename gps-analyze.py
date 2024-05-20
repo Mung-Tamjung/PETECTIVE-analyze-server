@@ -6,12 +6,14 @@ import folium
 app = Flask(__name__)
 
 @app.route('/')
-def hello_pybo():
-    return 'Hello, Pybo!'
+def home():
+    return 'gps_home'
 
 
-@app.route('/gps')  #/gps/<userid> - get_gps(userid)
-def get_gps():
+@app.route('/gps/<int:user_id>', methods=['GET'])  #/gps/<userid> - get_gps(userid)
+def get_gps(user_id):
+
+    #user_id로 DB에 사용자 검색(if문: 사용자 유무 판단)
     # 해당 사용자의 최근 7일 간의 gps 기록 모두 불러오기('lat','lon')
     # data=
     data = [(37.6528, 127.0163), (37.6528, 127.0164), (37.6528, 127.0165), (37.6528, 127.0165), (37.6528, 127.0162),
@@ -38,5 +40,4 @@ def get_gps():
                             radius=r * 10,
                             popup="(" + str(grouped_df.loc[p, 'lat']) + "," + str(grouped_df.loc[p, 'lon']) + ")",
                             fill=True).add_to(gps_map)
-
     return gps_map.get_root().render()
