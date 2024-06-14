@@ -27,8 +27,8 @@ def get_gps(user_id):
         'value_count').reset_index()  # [:n] ->상위 n개 순위만 표시하고 샆은 경우엔 인덱스 처리
 
     # 산점도
-    plt.scatter(grouped_df.lat, grouped_df.lon, s=grouped_df.value_count * 10)
-    plt.show()
+    #plt.scatter(grouped_df.lat, grouped_df.lon, s=grouped_df.value_count * 10)
+    #plt.show()
 
     # folium 지도
     gps_map = folium.Map(location=[37.6528, 127.0163], zoom_Start=50)  # 지도 초기 로딩위치
