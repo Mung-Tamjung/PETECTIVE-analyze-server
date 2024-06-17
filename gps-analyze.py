@@ -32,19 +32,19 @@ def get_gps(user_id):
     #해당 사용자의 반려동물 산책 데이터 분석
     from sklearn.cluster import KMeans
     from sklearn.metrics import silhouette_score, silhouette_samples
-        #1. 산책 경로 군집화(클러스터링)
+    #1. 산책 경로 군집화(클러스터링)
         #1.1 최적 클러스터 찾기(엘보우)
     X_features = grouped_df[['lat', 'lon']].values
-    distortions = []
-    for i in range(1,5):
-        kmeans_i = KMeans(n_clusters = i, random_state=0)
-        kmeans_i.fit(X_features)
-        distortions.append(kmeans_i.inertia_)
+    #distortions = []
+    #for i in range(1,5):
+    #    kmeans_i = KMeans(n_clusters = i, random_state=0)
+    #    kmeans_i.fit(X_features)
+    #    distortions.append(kmeans_i.inertia_)
 
-    plt.plot(range(1,5), distortions, marker='o')
-    plt.xlabel('Number of clusters')
-    plt.ylabel('Distortion')
-    plt.show()
+    #plt.plot(range(1,5), distortions, marker='o')
+    #plt.xlabel('Number of clusters')
+    #plt.ylabel('Distortion')
+    #plt.show()
 
     n_cluster = 3
     kmeans = KMeans(n_clusters=n_cluster, random_state=0)
@@ -53,21 +53,21 @@ def get_gps(user_id):
     print(X_features)
 
         #1.2 클러스터 분포 차트 확인
-    from matplotlib import cm
-    for i in range(n_cluster):
-        c_color = cm.jet(float(i)/n_cluster)
-        plt.scatter(X_features[Y_labels == i, 0], X_features[Y_labels == i, 1], marker='o', color= c_color, s=30, label='cluster'+str(i))
-        plt.scatter(kmeans.cluster_centers_[i,0], kmeans.cluster_centers_[i,1], marker='^', color=c_color, edgecolor='w', s=20)
-    plt.legend()
-    plt.grid()
-    plt.tight_layout()
-    plt.show()
+    #from matplotlib import cm
+    #for i in range(n_cluster):
+    #    c_color = cm.jet(float(i)/n_cluster)
+    #    plt.scatter(X_features[Y_labels == i, 0], X_features[Y_labels == i, 1], marker='o', color= c_color, s=30, label='cluster'+str(i))
+    #    plt.scatter(kmeans.cluster_centers_[i,0], kmeans.cluster_centers_[i,1], marker='^', color=c_color, edgecolor='w', s=20)
+    #plt.legend()
+    #plt.grid()
+    #plt.tight_layout()
+    #plt.show()
 
-        #2. 동물의 실종된 위치가 어느 군집에 해당하는지 파악
+    #2. 동물의 실종된 위치가 어느 군집에 해당하는지 파악
     lost_location=[[37.6528, 127.0161]]
     lost_predict = kmeans.predict(lost_location)
     print(lost_predict)
-        #3. 해당 군집 경로 기반으로 현재 동물 위치 예측
+    #3. 해당 군집 경로 기반으로 현재 동물 위치 예측
     
     # 산점도
     #plt.scatter(grouped_df.lat, grouped_df.lon, s=grouped_df.value_count * 10)
