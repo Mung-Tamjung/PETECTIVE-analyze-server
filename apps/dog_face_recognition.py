@@ -57,11 +57,11 @@ def face_locations(img, number_of_times_to_upsample=1):
 #얼굴 특징 검출
 @recognition_dog.route('/recognition', methods=['POST'])
 def recognize_dog():
-    input_image = request.files['file'] #이미지파일 받아오기
-    face_image = cv2.imread(input_image)
+    input_image = np.fromfile(request.files['file'], np.uint8)#request.files['file'] #.stream.read() #이미지파일 받아오기
+    face_image = cv2.imdecode(input_image, cv2.COLOR_BGR2RGB)
     det_locations = face_locations(face_image, 1)
     face_encoding = face_recognition.face_encodings(face_image, det_locations)[0]
-
+    face_encoding=face_encoding.tolist()
     data= {'encoding' : face_encoding}
     return jsonify(data)
 
