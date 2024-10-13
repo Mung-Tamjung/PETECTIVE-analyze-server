@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import folium
 from flask import Blueprint, jsonify
 from database import engine
+from datetime import datetime
 
 # app = Flask(__name__)
 app_gps = Blueprint('app_gps', __name__)
@@ -21,8 +22,11 @@ def home():
 def get_gps(user_id):
     # user_id로 DB에 사용자 검색(if문: 사용자 유무 판단)
     # 해당 사용자의 최근 7일 간의 gps 기록 모두 불러오기('lat','lon')
+    date1 = datetime.now().strftime('%Y-%m-%d')
+    date2 = date1 - datetime.timedelta(days=7)
+
     conn = engine.raw_connection()
-    sql = "select * from exercise_entity where userid='<user_id>'"
+    sql = f"select * from exercise_entity where userid={user_id} and {date2} between {date1}"#where절: userid, 날짜(지난 7주일) 확인
     data = pd.read_sql(sql, con = conn).values.tolist()
 
     #data = [(37.6528, 127.0163), (37.6528, 127.0164), (37.6528, 127.0165), (37.6528, 127.0165), (37.6528, 127.0162),
