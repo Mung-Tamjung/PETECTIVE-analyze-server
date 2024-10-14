@@ -14,14 +14,14 @@ class DevelopmentConfig(Config):
                             f"{os.getenv('DB_PWD')}@"\
                             f"{os.getenv('DB_HOST')}:"\
                             f"{os.getenv('DB_PORT')}/"\
-                            f"{os.getenv('DB_NAME')}"#?charset=utf8"
+                            f"{os.getenv('DB_NAME')}?charset=utf8"
 
 class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{os.getenv('DB_USER')}:"\
                             f"{os.getenv('DB_PWD')}@"\
                             f"{os.getenv('DB_HOST')}:"\
                             f"{os.getenv('DB_PORT')}/"\
-                            f"{os.getenv('DB_NAME')}"#?charset=utf8"
+                            f"{os.getenv('DB_NAME')}?charset=utf8"
 
 class TestingConfig(Config):
     TESTING = True
