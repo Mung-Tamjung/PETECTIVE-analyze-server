@@ -9,7 +9,8 @@ from database import engine
 import pandas as pd
 import pymysql
 import struct
-import array
+import codecs
+from array import array
 import numpy as np
 
 recognition_dog = Blueprint("recognition_dog", __name__, url_prefix="/dogs")
@@ -66,6 +67,9 @@ def recognize_dog():
     det_locations = face_locations(face_image, 1)
     face_encoding = face_recognition.face_encodings(face_image, det_locations)[0]
     face_encoding=face_encoding.tolist()
+    #en= [struct.pack('f', val) for val in face_encoding]
+    #print(b''.join(en))
+    #de = [struct.unpact('f', val) for val in en]
     data= {'encoding' : face_encoding}
     return jsonify(data)
 
@@ -93,19 +97,35 @@ def compare_dog():
         #데이터베이스에서 같은 강아지 종의 이미지 게시글 조회, 모두 가져오기{postid, encoding}
 
         #현재 게시글 이미지의 encoding 값과 같은 종 리스트의 encoding 값을 유사도 비교
-        #encoding_list = breeds_post['encoding'].tolist())
-        print(np.array(post.get('encoding')))
-        encoding = struct.unpack('d', post.get('encoding'))
-        print(encoding)
 
-        matches = face_recognition.compare_faces(breeds_post['encoding'], post.get('encoding'), tolerance=0.4) #bool 리스트 반환
-        face_distances = face_recognition.face_distance(breeds_post['encoding'], post.get('encoding')) #유사도 거리 비교
+        #print(type(post.get('encoding')))
+        encoding = post.get('encoding')
+        encoding =encoding[1:len(encoding)-1].split(',')
+        encoding = [float(val) for val in encoding]
+        #print(encoding)
+        encoding = np.array(encoding)
+
+        breeds_post_id = breeds_post['id'].tolist()
+        breeds_post = breeds_post['encoding'].tolist()
+        #print(breeds_post)
+        for index, b in enumerate(breeds_post):
+            print(type(b))
+            b = b[1:len(b)-1].split(',')
+            b = [float(val) for val in b]
+            breeds_post[index] = b
+
+
+        #print(type(breeds_post))
+        #print(breeds_post[0])
+
+        matches = face_recognition.compare_faces(breeds_post, encoding, tolerance=0.4) #bool 리스트 반환
+        face_distances = face_recognition.face_distance(breeds_post, encoding) #유사도 거리 비교
 
         sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
         for index in sorted_match_index:
-            if matches[sorted_match_index]:
-                related_post.append(breeds_post[index])
+            if matches[index]:
+                related_post.append(breeds_post_id[index])
                 if(len(related_post) == 6): break #유사도 상위 6개 반환
 
-        data = {'related_post' : related_post}
+        data = {'related_post' : related_post} #postid 반환 => post간략 정보 불러오기 수정
     return jsonify(data)
