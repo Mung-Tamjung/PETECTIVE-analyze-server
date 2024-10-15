@@ -2,15 +2,11 @@ from flask import Blueprint, jsonify, request
 import dlib
 import imutils
 from imutils import face_utils
-import numpy as np
 import cv2
 import face_recognition
 from database import engine
 import pandas as pd
 import pymysql
-import struct
-import codecs
-from array import array
 import numpy as np
 
 recognition_dog = Blueprint("recognition_dog", __name__, url_prefix="/dogs")
@@ -63,13 +59,11 @@ def face_locations(img, number_of_times_to_upsample=1):
 @recognition_dog.route('/recognition', methods=['POST'])
 def recognize_dog():
     input_image = np.fromfile(request.files['file'], np.uint8)#request.files['file'] #.stream.read() #이미지파일 받아오기
+    print(input_image)
     face_image = cv2.imdecode(input_image, cv2.COLOR_BGR2RGB)
     det_locations = face_locations(face_image, 1)
     face_encoding = face_recognition.face_encodings(face_image, det_locations)[0]
     face_encoding=face_encoding.tolist()
-    #en= [struct.pack('f', val) for val in face_encoding]
-    #print(b''.join(en))
-    #de = [struct.unpact('f', val) for val in en]
     data= {'encoding' : face_encoding}
     return jsonify(data)
 
@@ -91,9 +85,9 @@ def compare_dog():
     if (post.__sizeof__() == 0): data = None
     else:
         post=post[0]
-        sql_breed = f"select * from post_entity where breed='{post.get('breed')}'"
+        sql_breed = f"select post_entity.id, breed, encoding, title, username from post_entity, user_entity where breed='{post.get('breed')}' and post_entity.writer=user_entity.id"
         breeds_post = pd.read_sql(sql_breed, con=conn) #.values.tolist()
-        #print(breeds_post)
+        #print(list(breeds_post.columns))
         #데이터베이스에서 같은 강아지 종의 이미지 게시글 조회, 모두 가져오기{postid, encoding}
 
         #현재 게시글 이미지의 encoding 값과 같은 종 리스트의 encoding 값을 유사도 비교
@@ -105,27 +99,27 @@ def compare_dog():
         #print(encoding)
         encoding = np.array(encoding)
 
-        breeds_post_id = breeds_post['id'].tolist()
-        breeds_post = breeds_post['encoding'].tolist()
+        #breeds_post_id = breeds_post['id'].tolist()
+        breeds_post_encoding = breeds_post['encoding'].tolist()
         #print(breeds_post)
-        for index, b in enumerate(breeds_post):
+        for index, b in enumerate(breeds_post_encoding):
             print(type(b))
             b = b[1:len(b)-1].split(',')
             b = [float(val) for val in b]
-            breeds_post[index] = b
+            breeds_post_encoding[index] = b
 
 
         #print(type(breeds_post))
         #print(breeds_post[0])
 
-        matches = face_recognition.compare_faces(breeds_post, encoding, tolerance=0.4) #bool 리스트 반환
-        face_distances = face_recognition.face_distance(breeds_post, encoding) #유사도 거리 비교
+        matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.4) #bool 리스트 반환
+        face_distances = face_recognition.face_distance(breeds_post_encoding, encoding) #유사도 거리 비교
 
         sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
         for index in sorted_match_index:
             if matches[index]:
-                related_post.append(breeds_post_id[index])
+                related_post.append(breeds_post.iloc[index].loc[['id','title', 'username']].to_dict())
                 if(len(related_post) == 6): break #유사도 상위 6개 반환
 
-        data = {'related_post' : related_post} #postid 반환 => post간략 정보 불러오기 수정
+        data = {'data' : related_post} #postid, title, username 반환 => image url 추가 필요
     return jsonify(data)
