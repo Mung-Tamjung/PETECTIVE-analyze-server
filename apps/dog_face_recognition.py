@@ -85,12 +85,12 @@ def compare_dog():
     if (post.__sizeof__() == 0): data = None
     else:
         post=post[0]
-        sql_breed = f"select post.id, breed, encoding, title, username, url " \
+        sql_breed = f"select post.id, post_category, breed, encoding, title, username, url " \
                     f"from post_entity as post " \
                     f"left join user_entity as user on post.user_id = user.id " \
                     f"left join post_image_entity as image on post.id=image.post_id " \
                     f"group by post.id " \
-                    f"having breed='{post.get('breed')}'"
+                    f"having breed='{post.get('breed')}' and post.id !='{post.get('id')}'"
         breeds_post = pd.read_sql(sql_breed, con=conn) #.values.tolist()
         #print(list(breeds_post.columns))
         #데이터베이스에서 같은 강아지 종의 이미지 게시글 조회, 모두 가져오기{postid, encoding}
@@ -123,8 +123,8 @@ def compare_dog():
         sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
         for index in sorted_match_index:
             if matches[index]:
-                related_post.append(breeds_post.iloc[index].loc[['id','title', 'username','url']].to_dict())
+                related_post.append(breeds_post.iloc[index].loc[['id', 'post_category','title', 'username','url']].to_dict())
                 if(len(related_post) == 6): break #유사도 상위 6개 반환
 
-        data = {'data' : related_post} #id, title, username, url 반환(id: postid, url: 이미지 url)
+        data = {'data' : related_post} #id, post_category, title, username, url 반환(id: postid, url: 이미지 url)
     return jsonify(data)
