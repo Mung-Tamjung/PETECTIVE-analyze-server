@@ -1,5 +1,5 @@
 from flask import Flask
-from . import gps_analyze, dog_face_recognition
+from . import gps_analyze, dog_face_recognition, cat_face_recognition
 #from flask_sqlalchemy import SQLAlchemy
 #from database import db
 #from database import create_db
@@ -23,6 +23,7 @@ def create_app():
 
     app.register_blueprint(gps_analyze.app_gps)
     app.register_blueprint(dog_face_recognition.recognition_dog)
+    app.register_blueprint(cat_face_recognition.recognition_cat)
 
     app.config.from_object(config)
 
