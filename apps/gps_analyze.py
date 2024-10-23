@@ -66,7 +66,7 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
         'value_count').reset_index()  # [:n] ->상위 n개 순위만 표시하고 샆은 경우엔 인덱스 처리
 
     gps_map = folium.Map(location=[lat_list[0], lon_list[0]], zoom_Start=50)  # 지도 초기 로딩위치
-    lost_location = [[37.6528, 127.0161]] #실종 위치 임의 지정
+    #lost_location = [[37.6528, 127.0161]] #실종 위치 임의 지정
 
     # 데이터가 충분한 경우 클러스터 군집화 수행
     try:
@@ -91,6 +91,8 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
         Y_labels = kmeans.fit_predict(X_features)
         grouped_df['cluster_label'] = Y_labels
         print(X_features)
+        centers = kmeans.cluster_centers_
+        print(centers)
 
         # 1.2 클러스터 분포 차트 확인
     #    from matplotlib import cm
@@ -118,26 +120,24 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
         # folium 지도
         #gps_map = folium.Map(location=[lat_list[0], lon_list[0]], zoom_Start=50)  # 지도 초기 로딩위치
 
+        color=['red','green','blue']
         for p in grouped_df.index:
             lat = grouped_df.loc[p, 'lat']
             lon = grouped_df.loc[p, 'lon']
             r = float(grouped_df.loc[p, 'value_count'])
             c = grouped_df.loc[p, 'cluster_label']
 
-            color = 'grey'
-            if (c == lost_predict[0]):
-                color = 'green'
 
             folium.CircleMarker([lat, lon],
                                 radius=r * 10,
-                                color=color,
+                                color=color[c],
                                 popup="(" + str(grouped_df.loc[p, 'lat']) + "," + str(
                                     grouped_df.loc[p, 'lon']) + ")" + ": cluster" + str(c),
                                 fill=True).add_to(gps_map)
+        for c in centers:
             # 실종 위치 마커
-            folium.Marker([lost_location[0][0], lost_location[0][1]],
+            folium.Marker([c[0], c[1]],
                           radius=10,
-                          color='red',
                           popup="(" + str(grouped_df.loc[p, 'lat']) + "," + str(
                               grouped_df.loc[p, 'lon']) + ")" + ": cluster" + str(lost_predict[0]),
                           fill=True).add_to(gps_map)
@@ -156,13 +156,5 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
                                     grouped_df.loc[p, 'lon']) + ")" ,
                                 fill=True).add_to(gps_map)
 
-
-        # 실종 위치 마커
-        folium.Marker([lost_location[0][0], lost_location[0][1]],
-                      radius=10,
-                      color='red',
-                      popup="(" + str(grouped_df.loc[p, 'lat']) + "," + str(
-                          grouped_df.loc[p, 'lon']) + ")",
-                      fill=True).add_to(gps_map)
 
     return gps_map.get_root().render()
