@@ -109,7 +109,7 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
 
         # 2. 동물의 실종된 위치가 어느 군집에 해당하는지 파악
         #lost_location = [[37.6528, 127.0161]] #실종 위치 임의 지정
-        lost_predict = kmeans.predict(lost_location)
+        #lost_predict = kmeans.predict(lost_location)
         #print(lost_predict)
         # 3. 해당 군집 경로 기반으로 현재 동물 위치 예측
 
@@ -135,11 +135,11 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
                                     grouped_df.loc[p, 'lon']) + ")" + ": cluster" + str(c),
                                 fill=True).add_to(gps_map)
         for c in centers:
-            # 실종 위치 마커
+
             folium.Marker([c[0], c[1]],
                           radius=10,
-                          popup="(" + str(grouped_df.loc[p, 'lat']) + "," + str(
-                              grouped_df.loc[p, 'lon']) + ")" + ": cluster" + str(lost_predict[0]),
+                          popup="(" + str(c[0]) + "," + str(
+                              c[1]) + ")" + ": cluster",
                           fill=True).add_to(gps_map)
 
     # 데이터가 충분하지 않은 경우 분석 과정 중 에러 발생 -> 군집화 수행X
