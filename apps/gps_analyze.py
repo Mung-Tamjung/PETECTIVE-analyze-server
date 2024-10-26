@@ -37,6 +37,10 @@ def get_gps(user_id): #데이터 수가 너무 적은 경우 분석 불가 -> �
     # (lat, lon) count&sort
     df = pd.DataFrame(data)
     #print(df)
+    
+    #data 크기 확인 후, 0인 경우 빈 지도 렌더링
+    if df.size == 0:
+        return folium.Map(location=[37.566535, 126.9779692], zoom_Start=20).get_root().render()
 
     lat_list = []
     lon_list = []
