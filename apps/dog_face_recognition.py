@@ -117,7 +117,7 @@ def compare_dog():
         #print(type(breeds_post))
         #print(breeds_post[0])
 
-        matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.4) #bool 리스트 반환
+        matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.5) #bool 리스트 반환
         face_distances = face_recognition.face_distance(breeds_post_encoding, encoding) #유사도 거리 비교
 
         sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
