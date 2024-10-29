@@ -120,7 +120,7 @@ def compare_dog():
         matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.5) #bool 리스트 반환
         face_distances = face_recognition.face_distance(breeds_post_encoding, encoding) #유사도 거리 비교
 
-        sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
+        sorted_match_index = np.argsort(face_distances)[::-1] #np.argsort: 배열 정렬해 인덱스값 반환
         for index in sorted_match_index:
             if matches[index]:
                 related_post.append(breeds_post.iloc[index].loc[['id', 'post_category','title', 'username','url']].to_dict())
