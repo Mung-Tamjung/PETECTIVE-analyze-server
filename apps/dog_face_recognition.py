@@ -85,12 +85,15 @@ def compare_dog():
     if (post.__sizeof__() == 0): data = None
     else:
         post=post[0]
+        post_category = post.get('post_category')
+        if(post_category) == 0: post_category =1
+        else: post_category =0
         sql_breed = f"select post.id, post_category, breed, encoding, title, username, url " \
                     f"from post_entity as post " \
                     f"left join user_entity as user on post.user_id = user.id " \
                     f"left join post_image_entity as image on post.id=image.post_id " \
                     f"group by post.id " \
-                    f"having breed='{post.get('breed')}' and post.id !='{post.get('id')}'"
+                    f"having breed='{post.get('breed')}' and post.id !='{post.get('id')}' and post.post_category = {post_category}"
         breeds_post = pd.read_sql(sql_breed, con=conn) #.values.tolist()
         #print(list(breeds_post.columns))
         #데이터베이스에서 같은 강아지 종의 이미지 게시글 조회, 모두 가져오기{postid, encoding}
