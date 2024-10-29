@@ -40,8 +40,12 @@ def recognize_dog():
     print(input_image)
     face_image = cv2.imdecode(input_image, cv2.COLOR_BGR2RGB)
     det_locations = face_locations(face_image, 1)
-    face_encoding = face_recognition.face_encodings(face_image, det_locations)[0]
-    face_encoding=face_encoding.tolist()
+    try:
+        face_encoding = face_recognition.face_encodings(face_image, det_locations)[0]
+        face_encoding = face_encoding.tolist()
+    except:
+        face_encoding = []
+
     data= {'encoding' : face_encoding}
     return jsonify(data)
 
@@ -63,12 +67,15 @@ def compare_dog():
     if (post.__sizeof__() == 0): data = None
     else:
         post=post[0]
+        post_category = post.get('post_category')
+        if(post_category) == 0: post_category =1
+        else: post_category =0
         sql_breed = f"select post.id, post_category, breed, encoding, title, username, url " \
                     f"from post_entity as post " \
                     f"left join user_entity as user on post.user_id = user.id " \
                     f"left join post_image_entity as image on post.id=image.post_id " \
                     f"group by post.id " \
-                    f"having breed='{post.get('breed')}' and post.id !='{post.get('id')}'"
+                    f"having breed='{post.get('breed')}' and post.id !='{post.get('id')}' and post.post_category = {post_category} and post.encoding != '[]'"
         breeds_post = pd.read_sql(sql_breed, con=conn) #.values.tolist()
         #print(list(breeds_post.columns))
         #데이터베이스에서 같은 강아지 종의 이미지 게시글 조회, 모두 가져오기{postid, encoding}
@@ -77,32 +84,48 @@ def compare_dog():
 
         #print(type(post.get('encoding')))
         encoding = post.get('encoding')
-        encoding =encoding[1:len(encoding)-1].split(',')
-        encoding = [float(val) for val in encoding]
-        #print(encoding)
-        encoding = np.array(encoding)
 
-        #breeds_post_id = breeds_post['id'].tolist()
-        breeds_post_encoding = breeds_post['encoding'].tolist()
-        #print(breeds_post)
-        for index, b in enumerate(breeds_post_encoding):
-            print(type(b))
-            b = b[1:len(b)-1].split(',')
-            b = [float(val) for val in b]
-            breeds_post_encoding[index] = b
+        if(encoding == "[]") :
+            if len(breeds_post) == 0:
+                print(len(breeds_post))
+                related_post = []
+            elif len(breeds_post) < 6:
+                print(len(breeds_post))
+                for i in range(len(breeds_post)):
+                    related_post.append(breeds_post.iloc[i].loc[['id', 'post_category', 'title', 'username', 'url']].to_dict())
+            else:
+                print(len(breeds_post))
+                for i in range(6):
+                    related_post.append(breeds_post.iloc[i].loc[['id', 'post_category', 'title', 'username', 'url']].to_dict())
+
+        else:
+            encoding =encoding[1:len(encoding)-1].split(',')
+            encoding = [float(val) for val in encoding]
+            #print(encoding)
+            encoding = np.array(encoding)
+
+            #breeds_post_id = breeds_post['id'].tolist()
+            breeds_post_encoding = breeds_post['encoding'].tolist()
+            #print(breeds_post)
+            for index, b in enumerate(breeds_post_encoding):
+                print(type(b))
+                b = b[1:len(b)-1].split(',')
+                b = [float(val) for val in b]
+                breeds_post_encoding[index] = b
 
 
-        #print(type(breeds_post))
-        #print(breeds_post[0])
 
-        matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.5) #bool 리스트 반환
-        face_distances = face_recognition.face_distance(breeds_post_encoding, encoding) #유사도 거리 비교
+            #print(type(breeds_post))
+            #print(breeds_post[0])
 
-        sorted_match_index = np.argsort(face_distances) #np.argsort: 배열 정렬해 인덱스값 반환
-        for index in sorted_match_index:
-            if matches[index]:
-                related_post.append(breeds_post.iloc[index].loc[['id', 'post_category','title', 'username','url']].to_dict())
-                if(len(related_post) == 6): break #유사도 상위 6개 반환
+            matches = face_recognition.compare_faces(breeds_post_encoding, encoding, tolerance=0.5) #bool 리스트 반환
+            face_distances = face_recognition.face_distance(breeds_post_encoding, encoding) #유사도 거리 비교
+
+            sorted_match_index = np.argsort(face_distances)[::-1] #np.argsort: 배열 정렬해 인덱스값 반환
+            for index in sorted_match_index:
+                if matches[index]:
+                    related_post.append(breeds_post.iloc[index].loc[['id', 'post_category','title', 'username','url']].to_dict())
+                    if(len(related_post) == 6): break #유사도 상위 6개 반환
 
         data = {'data' : related_post} #id, post_category, title, username, url 반환(id: postid, url: 이미지 url)
     return jsonify(data)
