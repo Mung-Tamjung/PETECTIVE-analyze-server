@@ -1,3 +1,13 @@
+# PETECTIVE : 딥러닝 이미지 검색을 통한 실종 반려동물 찾기
+&emsp; 2024년 덕성여자대학교 캡스톤 프로젝트  
+&emsp; 2024년 한이음 이브와 공모전   
+&emsp; 2024년 덕성여자대학교 과학기술대학 학술제 우수상 수상  
+
+### 팀 구성 및 역할
+&emsp; 정혜연 [@hznnoy](https://github.com/hznnoy) : 백엔드 서버, 반려동물 종 분류 모델  
+&emsp; 박지현 [@juserh](https://github.com/juserh) : 백엔드 서버, 반려동물 유사도 및 활동 분석 서버  
+&emsp; 왕예진 [@match99](https://github.com/matcha99) : 프론트엔드  
+
 ![image](https://github.com/user-attachments/assets/a04bfc6a-b8cf-4b88-8cc5-dc3d0256f305)
 ![image](https://github.com/user-attachments/assets/9117bb65-5780-4da2-a208-d137a03392d5)
 ![image](https://github.com/user-attachments/assets/1594c654-9fb0-4c0d-982a-9ebf45da3bb0) 
